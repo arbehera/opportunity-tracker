@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const opportunityController_1 = require("../controllers/opportunityController");
+const auth_1 = require("../middleware/auth");
+const rbac_1 = require("../middleware/rbac");
+const validation_1 = require("../middleware/validation");
+const opportunities_1 = require("../validators/opportunities");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticate);
+router.get('/', opportunityController_1.opportunityController.getAll);
+router.get('/export/excel', opportunityController_1.opportunityController.exportExcel);
+router.get('/:id', opportunityController_1.opportunityController.getById);
+router.get('/:id/history', opportunityController_1.opportunityController.getHistory);
+router.post('/', (0, rbac_1.requireRole)('ADMIN', 'MANAGER', 'SALES'), (0, validation_1.validate)(opportunities_1.createOpportunitySchema), opportunityController_1.opportunityController.create);
+router.put('/:id', (0, rbac_1.requireRole)('ADMIN', 'MANAGER', 'SALES'), (0, validation_1.validate)(opportunities_1.updateOpportunitySchema), opportunityController_1.opportunityController.update);
+router.delete('/:id', (0, rbac_1.requireRole)('ADMIN', 'MANAGER'), opportunityController_1.opportunityController.delete);
+exports.default = router;

@@ -1,0 +1,23 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.router = void 0;
+const express_1 = require("express");
+const auth_1 = __importDefault(require("./auth"));
+const opportunities_1 = __importDefault(require("./opportunities"));
+const analytics_1 = __importDefault(require("./analytics"));
+const users_1 = __importDefault(require("./users"));
+const master_1 = __importDefault(require("./master"));
+const documents_1 = __importDefault(require("./documents"));
+const notifications_1 = __importDefault(require("./notifications"));
+exports.router = (0, express_1.Router)();
+exports.router.get('/health', (req, res) => res.json({ status: 'ok' }));
+exports.router.use('/auth', auth_1.default);
+exports.router.use('/opportunities', opportunities_1.default);
+exports.router.use('/analytics', analytics_1.default);
+exports.router.use('/users', users_1.default);
+exports.router.use('/master', master_1.default);
+exports.router.use('/documents', documents_1.default);
+exports.router.use('/notifications', notifications_1.default);

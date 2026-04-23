@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const documentController_1 = require("../controllers/documentController");
+const auth_1 = require("../middleware/auth");
+const rbac_1 = require("../middleware/rbac");
+const validation_1 = require("../middleware/validation");
+const documents_1 = require("../validators/documents");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticate);
+router.get('/', documentController_1.documentController.getAll);
+router.get('/sharepoint/browse', documentController_1.documentController.browseSP);
+router.get('/:id', documentController_1.documentController.getById);
+router.post('/', (0, validation_1.validate)(documents_1.createDocumentSchema), documentController_1.documentController.create);
+router.put('/:id', (0, validation_1.validate)(documents_1.updateDocumentSchema), documentController_1.documentController.update);
+router.delete('/:id', (0, rbac_1.requireRole)('ADMIN', 'MANAGER'), documentController_1.documentController.delete);
+router.post('/:id/log-access', documentController_1.documentController.logAccess);
+exports.default = router;

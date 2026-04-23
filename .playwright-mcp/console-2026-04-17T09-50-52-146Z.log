@@ -1,0 +1,10 @@
+[    2546ms] [WARNING] crbug/1173575, non-JS module files deprecated. @ file:///D:/src/opportunity-tracker/:231
+[   19775ms] [ERROR] Not allowed to load local resource: file:///D:/src/opportunity-tracker/OE-opportunities-tracker.xlsx @ :1
+[   27878ms] [WARNING] crbug/1173575, non-JS module files deprecated. @ file:///D:/src/opportunity-tracker/:231
+[   28072ms] [ERROR] Access to fetch at 'file:///D:/src/opportunity-tracker/OE-opportunities-tracker.xlsx' from origin 'null' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: chrome, chrome-extension, chrome-untrusted, data, http, https, isolated-app. @ file:///D:/src/opportunity-tracker/:0
+[   28072ms] [ERROR] Failed to load resource: net::ERR_FAILED @ file:///D:/src/opportunity-tracker/OE-opportunities-tracker.xlsx:0
+[   33757ms] [WARNING] crbug/1173575, non-JS module files deprecated. @ file:///D:/src/opportunity-tracker/:231
+[   33878ms] [ERROR] Access to XMLHttpRequest at 'file:///D:/src/opportunity-tracker/OE-opportunities-tracker.xlsx' from origin 'null' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: chrome, chrome-extension, chrome-untrusted, data, http, https, isolated-app. @ file:///D:/src/opportunity-tracker/:0
+[   33879ms] [ERROR] Failed to load resource: net::ERR_FAILED @ file:///D:/src/opportunity-tracker/OE-opportunities-tracker.xlsx:0
+[  707891ms] [ERROR] Access to fetch at 'file:///D:/src/opportunity-tracker/OE-opportunities-tracker.xlsx' from origin 'null' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: chrome, chrome-extension, chrome-untrusted, data, http, https, isolated-app. @ file:///D:/src/opportunity-tracker/read_xlsx.html:0
+[  707892ms] [ERROR] Failed to load resource: net::ERR_FAILED @ file:///D:/src/opportunity-tracker/OE-opportunities-tracker.xlsx:0

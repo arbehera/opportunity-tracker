@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head><title>XLSX Reader</title></head>
+<body>
+<div id="output">Loading...</div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+(async function() {
+  try {
+    const response = await fetch('OE-opportunities-tracker.xlsx');
+    const buffer = await response.arrayBuffer();
+    const data = new Uint8Array(buffer);
+    const wb = XLSX.read(data, { type: 'array', cellDates: true });
+    const output = { sheetNames: wb.SheetNames, sheets: {} };
+    for (const name of wb.SheetNames) {
+      const ws = wb.Sheets[name];
+      const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+      output.sheets[name] = {
+        totalRows: json.length,
+        headers: json[0] || [],
+        sampleRows: json.slice(1, 6)
+      };
+    }
+    document.getElementById('output').textContent = JSON.stringify(output, null, 2);
+    window.__xlsxData = output;
+  } catch(e) {
+    document.getElementById('output').textContent = 'ERROR: ' + e.message;
+  }
+})();
+</script>
+</body>
+</html>
