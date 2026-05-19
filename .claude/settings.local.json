@@ -53,7 +53,9 @@
       "Bash(python3 -c \"import os; [print\\(os.path.join\\(root, f\\)\\) for root, dirs, files in os.walk\\('D:\\\\\\\\src\\\\\\\\opportunity-tracker\\\\\\\\frontend\\\\\\\\src'\\) for f in files]\")",
       "Bash(powershell.exe *)",
       "Bash(node *)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(Get-ChildItem -Force)",
+      "Bash(Select-Object Name, Mode)"
     ]
   }
 }

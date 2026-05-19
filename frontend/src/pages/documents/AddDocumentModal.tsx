@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createDocument } from '@/api/documents';
 import { customersApi } from '@/api/master';
 import { getUsers } from '@/api/users';
+import { getOpportunities } from '@/api/opportunities';
 
 const DOC_TYPES = [
   'PROPOSAL', 'QUOTATION', 'CONTRACT', 'SPECIFICATION', 'NDA',
@@ -16,9 +17,10 @@ const DOC_TYPES = [
 interface Props {
   open: boolean;
   onClose: () => void;
+  opportunityId?: string;
 }
 
-export default function AddDocumentModal({ open, onClose }: Props) {
+export default function AddDocumentModal({ open, onClose, opportunityId }: Props) {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
 
@@ -32,9 +34,15 @@ export default function AddDocumentModal({ open, onClose }: Props) {
     queryFn: () => getUsers({ limit: 200 }),
     staleTime: 60000,
   });
+  const { data: oppsData } = useQuery({
+    queryKey: ['opportunities', 'select-list'],
+    queryFn: () => getOpportunities({ limit: 200, page: 1 }),
+    staleTime: 60000,
+  });
 
-  const customers = (customersData?.data?.data || []) as any[];
-  const users     = (usersData?.data?.data || []) as any[];
+  const customers    = (customersData?.data?.data || []) as any[];
+  const users        = (usersData?.data?.data || []) as any[];
+  const opportunities = (oppsData?.data?.data || []) as any[];
 
   const mutation = useMutation({
     mutationFn: (values: any) => createDocument(values),
@@ -50,23 +58,27 @@ export default function AddDocumentModal({ open, onClose }: Props) {
   });
 
   useEffect(() => {
-    if (!open) form.resetFields();
-  }, [open, form]);
+    if (open) {
+      form.resetFields();
+      if (opportunityId) form.setFieldValue('opportunityId', opportunityId);
+    }
+  }, [open, opportunityId, form]);
 
   const handleSubmit = () => {
     form.validateFields().then((values) => {
       const payload: any = {
-        title:         values.title,
-        documentType:  values.documentType,
-        sharepointUrl: values.sharepointUrl,
-        fileName:      values.fileName,
-        customerId:    values.customerId || null,
-        receivedById:  values.receivedById || null,
-        receivedDate:  values.receivedDate ? values.receivedDate.toISOString() : null,
-        description:   values.description || null,
-        version:       values.version || null,
+        title:          values.title,
+        documentType:   values.documentType,
+        sharepointUrl:  values.sharepointUrl,
+        fileName:       values.fileName,
+        customerId:     values.customerId || null,
+        opportunityId:  values.opportunityId || null,
+        receivedById:   values.receivedById || null,
+        receivedDate:   values.receivedDate ? values.receivedDate.toISOString() : null,
+        description:    values.description || null,
+        version:        values.version || null,
         isConfidential: values.isConfidential ?? false,
-        tags:          values.tags || [],
+        tags:           values.tags || [],
       };
       mutation.mutate(payload);
     });
@@ -130,6 +142,24 @@ export default function AddDocumentModal({ open, onClose }: Props) {
             </Form.Item>
           </Col>
           <Col span={12}>
+            <Form.Item name="opportunityId" label="Opportunity">
+              <Select
+                showSearch
+                allowClear
+                placeholder="Link to opportunity (optional)"
+                optionFilterProp="label"
+                disabled={Boolean(opportunityId)}
+                options={opportunities.map((o: any) => ({
+                  value: o.id,
+                  label: `#${o.serialNumber} — ${o.description?.substring(0, 40)}${o.description?.length > 40 ? '…' : ''} (${o.customer?.name})`,
+                }))}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={12}>
             <Form.Item name="receivedById" label="Received By">
               <Select
                 showSearch
@@ -140,20 +170,20 @@ export default function AddDocumentModal({ open, onClose }: Props) {
               />
             </Form.Item>
           </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={8}>
+          <Col span={12}>
             <Form.Item name="receivedDate" label="Received Date">
               <DatePicker style={{ width: '100%' }} />
             </Form.Item>
           </Col>
-          <Col span={8}>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={12}>
             <Form.Item name="version" label="Version">
               <Input placeholder="v1.0" />
             </Form.Item>
           </Col>
-          <Col span={8}>
+          <Col span={12}>
             <Form.Item name="isConfidential" label="Confidential" valuePropName="checked" initialValue={false}>
               <Switch />
             </Form.Item>

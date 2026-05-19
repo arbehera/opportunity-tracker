@@ -18,5 +18,6 @@ router.get('/customer-category', analyticsController.customerCategory);
 router.get('/team', analyticsController.team);
 router.get('/count', analyticsController.count);
 router.get('/charts', analyticsController.charts);
+router.get('/stale', analyticsController.staleOpportunities);
 
 export default router;

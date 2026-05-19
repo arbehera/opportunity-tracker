@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import { updateDocument } from '@/api/documents';
 import { customersApi } from '@/api/master';
 import { getUsers } from '@/api/users';
+import { getOpportunities } from '@/api/opportunities';
 
 const DOC_TYPES = [
   'PROPOSAL', 'QUOTATION', 'CONTRACT', 'SPECIFICATION', 'NDA',
@@ -35,8 +36,15 @@ export default function EditDocumentModal({ open, document, onClose }: Props) {
     staleTime: 60000,
   });
 
-  const customers = (customersData?.data?.data || []) as any[];
-  const users     = (usersData?.data?.data || []) as any[];
+  const { data: oppsData } = useQuery({
+    queryKey: ['opportunities', 'select-list'],
+    queryFn: () => getOpportunities({ limit: 200, page: 1 }),
+    staleTime: 60000,
+  });
+
+  const customers    = (customersData?.data?.data || []) as any[];
+  const users        = (usersData?.data?.data || []) as any[];
+  const opportunities = (oppsData?.data?.data || []) as any[];
 
   const mutation = useMutation({
     mutationFn: (values: any) => updateDocument(document?.id, values),
@@ -59,6 +67,7 @@ export default function EditDocumentModal({ open, document, onClose }: Props) {
         sharepointUrl:  document.sharepointUrl,
         fileName:       document.fileName,
         customerId:     document.customer?.id || null,
+        opportunityId:  document.opportunity?.id || null,
         receivedById:   document.receivedBy?.id || null,
         receivedDate:   document.receivedDate ? dayjs(document.receivedDate) : null,
         version:        document.version || '',
@@ -79,6 +88,7 @@ export default function EditDocumentModal({ open, document, onClose }: Props) {
         sharepointUrl:  values.sharepointUrl,
         fileName:       values.fileName,
         customerId:     values.customerId || null,
+        opportunityId:  values.opportunityId || null,
         receivedById:   values.receivedById || null,
         receivedDate:   values.receivedDate ? values.receivedDate.utc().toISOString() : null,
         description:    values.description || null,
@@ -148,6 +158,23 @@ export default function EditDocumentModal({ open, document, onClose }: Props) {
             </Form.Item>
           </Col>
           <Col span={12}>
+            <Form.Item name="opportunityId" label="Opportunity">
+              <Select
+                showSearch
+                allowClear
+                placeholder="Link to opportunity (optional)"
+                optionFilterProp="label"
+                options={opportunities.map((o: any) => ({
+                  value: o.id,
+                  label: `#${o.serialNumber} — ${o.description?.substring(0, 40)}${o.description?.length > 40 ? '…' : ''} (${o.customer?.name})`,
+                }))}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={12}>
             <Form.Item name="receivedById" label="Received By">
               <Select
                 showSearch
@@ -158,20 +185,20 @@ export default function EditDocumentModal({ open, document, onClose }: Props) {
               />
             </Form.Item>
           </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={8}>
+          <Col span={12}>
             <Form.Item name="receivedDate" label="Received Date">
               <DatePicker style={{ width: '100%' }} />
             </Form.Item>
           </Col>
-          <Col span={8}>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={12}>
             <Form.Item name="version" label="Version">
               <Input placeholder="v1.0" />
             </Form.Item>
           </Col>
-          <Col span={8}>
+          <Col span={12}>
             <Form.Item name="isConfidential" label="Confidential" valuePropName="checked">
               <Switch />
             </Form.Item>

@@ -47,3 +47,6 @@ export const getCountAnalytics = (filters?: AnalyticsFilters) =>
 
 export const getDashboardCharts = (filters?: AnalyticsFilters) =>
   client.get<ApiResponse<any>>('/analytics/charts', { params: filters });
+
+export const getStaleOpportunities = () =>
+  client.get<ApiResponse<any[]>>('/analytics/stale');

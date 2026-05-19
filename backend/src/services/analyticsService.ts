@@ -350,4 +350,51 @@ export const analyticsService = {
     ]);
     return { buData, categoryData, stageData };
   },
+
+  async getStaleOpportunities() {
+    const STALE_THRESHOLD_DAYS = 7;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - STALE_THRESHOLD_DAYS);
+
+    const opportunities = await prisma.opportunity.findMany({
+      where: {
+        isActive: true,
+        dealStage: { code: { notIn: ['SECURED', 'O(H)', 'O(L)'] } },
+      },
+      include: {
+        customer: { select: { name: true } },
+        dealStage: { select: { code: true } },
+        confidenceLevel: { select: { name: true } },
+        history: {
+          where: { fieldName: 'dealStageId' },
+          orderBy: { changedAt: 'desc' },
+          take: 1,
+          select: { changedAt: true },
+        },
+      },
+    });
+
+    const now = new Date();
+
+    const stale = opportunities
+      .map((o) => {
+        const lastActivity: Date = o.history.length > 0 ? o.history[0].changedAt : o.createdAt;
+        const daysSince = Math.floor((now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+        return {
+          id: o.id,
+          serialNumber: o.serialNumber,
+          customerName: (o.customer as any).name,
+          description: o.description,
+          stageCode: (o.dealStage as any).code,
+          confidenceName: (o.confidenceLevel as any)?.name ?? '',
+          tcvUsdMillion: Number(o.tcvUsdMillion),
+          lastActivityDate: lastActivity.toISOString(),
+          daysSinceActivity: daysSince,
+        };
+      })
+      .filter((o) => o.daysSinceActivity >= STALE_THRESHOLD_DAYS)
+      .sort((a, b) => b.daysSinceActivity - a.daysSinceActivity);
+
+    return stale;
+  },
 };

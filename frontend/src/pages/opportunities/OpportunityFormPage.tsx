@@ -1,15 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Form, Input, Select, DatePicker, InputNumber, Button, Card, Row, Col,
-  Typography, Space, Spin, message,
+  Typography, Space, Spin, message, Table, Tag, Tooltip,
 } from 'antd';
-import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, SaveOutlined, PlusOutlined, LinkOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { getOpportunity, createOpportunity, updateOpportunity } from '@/api/opportunities';
+import { getDocuments } from '@/api/documents';
 import { useMasterData } from '@/hooks/useMasterData';
 import { useAuthStore } from '@/stores/authStore';
+import AddDocumentModal from '@/pages/documents/AddDocumentModal';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -21,6 +23,7 @@ export default function OpportunityFormPage() {
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
   const user = useAuthStore((s) => s.user);
+  const [addDocOpen, setAddDocOpen] = useState(false);
 
   const {
     customers, productCategories, productSubcategories, businessCategories,
@@ -37,6 +40,13 @@ export default function OpportunityFormPage() {
     queryFn: () => getOpportunity(id!),
     enabled: isEdit,
   });
+
+  const { data: docsRes } = useQuery({
+    queryKey: ['documents', { opportunityId: id }],
+    queryFn: () => getDocuments({ opportunityId: id }),
+    enabled: isEdit,
+  });
+  const linkedDocs = (docsRes?.data?.data || []) as any[];
 
   useEffect(() => {
     if (oppRes?.data?.data) {
@@ -264,6 +274,84 @@ export default function OpportunityFormPage() {
           </Col>
         </Row>
       </Form>
+
+      {isEdit && (
+        <>
+          <Card
+            size="small"
+            style={{ marginTop: 24 }}
+            title={<span><LinkOutlined style={{ marginRight: 6 }} />Documents</span>}
+            extra={
+              <Button
+                size="small"
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => setAddDocOpen(true)}
+              >
+                Add Document
+              </Button>
+            }
+          >
+            <Table
+              dataSource={linkedDocs}
+              rowKey="id"
+              size="small"
+              pagination={false}
+              locale={{ emptyText: 'No documents linked to this opportunity' }}
+              columns={[
+                {
+                  title: 'Title',
+                  dataIndex: 'title',
+                  ellipsis: true,
+                  render: (v: string, r: any) => (
+                    <a href={r.sharepointUrl} target="_blank" rel="noreferrer">{v}</a>
+                  ),
+                },
+                {
+                  title: 'Type',
+                  dataIndex: 'documentType',
+                  width: 150,
+                  render: (v: string) => {
+                    const typeColors: Record<string, string> = {
+                      PROPOSAL: 'blue', QUOTATION: 'cyan', CONTRACT: 'green',
+                      SPECIFICATION: 'geekblue', NDA: 'orange', MEETING_MINUTES: 'purple',
+                      PURCHASE_ORDER: 'magenta', INVOICE: 'gold',
+                      TECHNICAL_DOCUMENT: 'lime', CORRESPONDENCE: 'volcano', OTHER: 'default',
+                    };
+                    return <Tag color={typeColors[v] || 'default'}>{v.replace(/_/g, ' ')}</Tag>;
+                  },
+                },
+                { title: 'File Name', dataIndex: 'fileName', ellipsis: true, width: 180 },
+                {
+                  title: 'Uploaded',
+                  dataIndex: 'createdAt',
+                  width: 100,
+                  render: (v: string) => new Date(v).toLocaleDateString(),
+                },
+                {
+                  title: '',
+                  key: 'open',
+                  width: 60,
+                  render: (_: any, r: any) => (
+                    <Tooltip title="Open in SharePoint">
+                      <a href={r.sharepointUrl} target="_blank" rel="noreferrer">Open</a>
+                    </Tooltip>
+                  ),
+                },
+              ]}
+            />
+          </Card>
+
+          <AddDocumentModal
+            open={addDocOpen}
+            onClose={() => {
+              setAddDocOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['documents', { opportunityId: id }] });
+            }}
+            opportunityId={id}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -50,4 +50,8 @@ export const analyticsController = {
     const data = await analyticsService.getDashboardCharts(req.query);
     res.json({ success: true, data });
   },
+  async staleOpportunities(_req: Request, res: Response) {
+    const data = await analyticsService.getStaleOpportunities();
+    res.json({ success: true, data });
+  },
 };
