@@ -55,7 +55,8 @@
       "Bash(node *)",
       "Bash(xargs grep *)",
       "Bash(Get-ChildItem -Force)",
-      "Bash(Select-Object Name, Mode)"
+      "Bash(Select-Object Name, Mode)",
+      "Bash(npm ls *)"
     ]
   }
 }
