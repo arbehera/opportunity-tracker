@@ -27,17 +27,20 @@ cp .env.example .env
 
 ### 2. Start with Docker Compose
 ```bash
-docker-compose up -d
+docker compose up -d --build
 ```
 
-Services:
+Services (local defaults):
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:3001/api/v1
-- **pgAdmin**: http://localhost:5050 (admin@oe.local / admin123)
+- **pgAdmin**: http://localhost:5050 (`admin@oe.com` / `admin123`)
+
+For **VM deployment** (e.g. http://172.29.153.63 on port 80), see [DEPLOY.md](./DEPLOY.md).
 
 ### 3. Seed the database
 ```bash
-docker-compose exec backend npm run db:seed
+docker compose exec backend npx prisma db push   # first run only
+docker compose exec backend npm run db:seed
 ```
 
 ### Default Login
